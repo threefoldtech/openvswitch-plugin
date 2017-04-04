@@ -1,3 +1,5 @@
+> NOTE: This required core0 branch `container-plugins` checked out for this to build
+
 ## OVS container
 Ovs container is a container with ovs capabilities. Once a container is created
 from this image (with host_network=True), ovs capabilities will be plugged
