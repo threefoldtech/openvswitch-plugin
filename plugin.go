@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	Plugin = plugin.Commands{
+	commands = plugin.Commands{
 		"bridge-add": ovs.BridgeAdd,
 		"bridge-del": ovs.BridgeDelete,
 		"port-add":   ovs.PortAdd,
@@ -15,5 +15,5 @@ var (
 )
 
 func main() {
-	plugin.Plugin(Plugin)
+	plugin.Plugin(commands)
 }
