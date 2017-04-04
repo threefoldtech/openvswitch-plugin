@@ -64,3 +64,95 @@ func BridgeDelete(args json.RawMessage) (interface{}, error) {
 
 	return vsctl("del-br", bridge.Bridge)
 }
+
+type PortAddArguments struct {
+	Bridge
+	Port    string            `json:"port"`
+	VLan    uint16            `json:"vlan"`
+	Options map[string]string `json:"options"`
+}
+
+func (p *PortAddArguments) Validate() error {
+	if err := p.Bridge.Validate(); err != nil {
+		return err
+	}
+	if p.Port == "" {
+		return fmt.Errorf("missing port name")
+	}
+	return nil
+}
+
+func PortAdd(args json.RawMessage) (interface{}, error) {
+	var port PortAddArguments
+	if err := json.Unmarshal(args, &port); err != nil {
+		return nil, err
+	}
+
+	if err := port.Validate(); err != nil {
+		return nil, err
+	}
+
+	var err error
+	if port.VLan == 0 {
+		_, err = vsctl("add-port", port.Bridge.Bridge, port.Port)
+	} else {
+		_, err = vsctl("add-port", port.Bridge.Bridge, port.Port, fmt.Sprintf("tag=%d", port.VLan))
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	//setting options
+	if len(port.Options) != 0 {
+		return nil, set(&SetArguments{
+			Table:  "Interface",
+			Record: port.Port,
+			Values: port.Options,
+		})
+	}
+
+	return nil, nil
+}
+
+type SetArguments struct {
+	Table  string            `json:"table"`
+	Record string            `json:"record"`
+	Values map[string]string `json:"values"`
+}
+
+func (s *SetArguments) Validate() error {
+	if s.Table == "" {
+		return fmt.Errorf("missing table name")
+	}
+	if s.Record == "" {
+		return fmt.Errorf("missing record")
+	}
+	if len(s.Values) == 0 {
+		return fmt.Errorf("no values to set")
+	}
+
+	return nil
+}
+
+func set(s *SetArguments) error {
+	args := []string{"set", s.Table, s.Record}
+	for key, value := range s.Values {
+		args = append(args, fmt.Sprintf("%s=%s", key, value))
+	}
+
+	_, err := vsctl(args...)
+	return err
+}
+
+func Set(args json.RawMessage) (interface{}, error) {
+	var s SetArguments
+	if err := json.Unmarshal(args, &s); err != nil {
+		return nil, err
+	}
+	if err := s.Validate(); err != nil {
+		return nil, err
+	}
+
+	return nil, set(&s)
+}

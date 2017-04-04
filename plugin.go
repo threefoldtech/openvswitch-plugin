@@ -9,6 +9,8 @@ var (
 	Plugin = plugin.Commands{
 		"bridge-add": ovs.BridgeAdd,
 		"bridge-del": ovs.BridgeDelete,
+		"port-add":   ovs.PortAdd,
+		"set":        ovs.Set,
 	}
 )
 
