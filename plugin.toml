@@ -1,3 +1,5 @@
 [plugin.ovs]
 path = "/var/lib/corex/plugins/ovs-plugin"
-exports = ["bridge-add", "bridge-del", "port-add", "port-del", "bond-add", "set"]
+queue = true #we queue the commands for thread safety, no 2 commands will run at the same time
+exports = ["bridge-add", "bridge-del", "port-add", "port-del", "bond-add", "set",
+		   "vtep-ensure", "vtep-del"]

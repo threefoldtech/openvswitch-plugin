@@ -199,6 +199,7 @@ type BondAddArguments struct {
 	Port  string   `json:"port"`
 	Links []string `json:"links"`
 	Mode  BondMode `json:"mode"`
+	LACP  bool     `json:"lacp"`
 }
 
 func (b *BondAddArguments) Validate() error {
@@ -232,6 +233,9 @@ func BondAdd(args json.RawMessage) (interface{}, error) {
 	}
 	a := []string{"add-bond", bond.Bridge.Bridge, bond.Port}
 	a = append(a, bond.Links...)
+	if bond.LACP {
+		a = append(a, "lacp=active")
+	}
 	a = append(a, fmt.Sprintf("bond_mode=%v", mode))
 
 	_, err := vsctl(a...)

@@ -7,12 +7,14 @@ import (
 
 var (
 	commands = plugin.Commands{
-		"bridge-add": ovs.BridgeAdd,
-		"bridge-del": ovs.BridgeDelete,
-		"port-add":   ovs.PortAdd,
-		"port-del":   ovs.PortDel,
-		"bond-add":   ovs.BondAdd,
-		"set":        ovs.Set,
+		"bridge-add":  ovs.BridgeAdd,
+		"bridge-del":  ovs.BridgeDelete,
+		"port-add":    ovs.PortAdd,
+		"port-del":    ovs.PortDel,
+		"bond-add":    ovs.BondAdd,
+		"vtep-ensure": ovs.VtepEnsure,
+		"vtep-del":    ovs.VtepDelete,
+		"set":         ovs.Set,
 	}
 )
 
