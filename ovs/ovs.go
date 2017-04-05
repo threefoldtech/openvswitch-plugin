@@ -115,6 +115,35 @@ func PortAdd(args json.RawMessage) (interface{}, error) {
 	return nil, nil
 }
 
+type PortDelArguments struct {
+	Bridge
+	Port string `json:"port"`
+}
+
+func (p *PortDelArguments) Validate() error {
+	if err := p.Bridge.Validate(); err != nil {
+		return err
+	}
+	if p.Port == "" {
+		return fmt.Errorf("missing port name")
+	}
+	return nil
+}
+
+func PortDel(args json.RawMessage) (interface{}, error) {
+	var port PortDelArguments
+	if err := json.Unmarshal(args, &port); err != nil {
+		return nil, err
+	}
+
+	if err := port.Validate(); err != nil {
+		return nil, err
+	}
+	_, err := vsctl("del-port", port.Bridge.Bridge, port.Port)
+
+	return nil, err
+}
+
 type SetArguments struct {
 	Table  string            `json:"table"`
 	Record string            `json:"record"`
