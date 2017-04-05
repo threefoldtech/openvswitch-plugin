@@ -10,6 +10,7 @@ var (
 		"bridge-add": ovs.BridgeAdd,
 		"bridge-del": ovs.BridgeDelete,
 		"port-add":   ovs.PortAdd,
+		"bond-add":   ovs.BondAdd,
 		"set":        ovs.Set,
 	}
 )

@@ -156,3 +156,55 @@ func Set(args json.RawMessage) (interface{}, error) {
 
 	return nil, set(&s)
 }
+
+type BondMode string
+
+const (
+	BondModeActiveBackup = BondMode("active-backup")
+	BondModeBalanceSLB   = BondMode("balance-slb")
+	BondModeBalanceTCP   = BondMode("balance-tcp")
+)
+
+type BondAddArguments struct {
+	Bridge
+	Port  string   `json:"port"`
+	Links []string `json:"links"`
+	Mode  BondMode `json:"mode"`
+}
+
+func (b *BondAddArguments) Validate() error {
+	if err := b.Bridge.Validate(); err != nil {
+		return err
+	}
+
+	if b.Port == "" {
+		return fmt.Errorf("missing port name")
+	}
+
+	if len(b.Links) <= 1 {
+		return fmt.Errorf("need more than one link to bond")
+	}
+
+	return nil
+}
+
+func BondAdd(args json.RawMessage) (interface{}, error) {
+	var bond BondAddArguments
+	if err := json.Unmarshal(args, &bond); err != nil {
+		return nil, err
+	}
+
+	if err := bond.Validate(); err != nil {
+		return nil, err
+	}
+	mode := bond.Mode
+	if mode == BondMode("") {
+		mode = BondModeBalanceSLB
+	}
+	a := []string{"add-bond", bond.Bridge.Bridge, bond.Port}
+	a = append(a, bond.Links...)
+	a = append(a, fmt.Sprintf("bond_mode=%v", mode))
+
+	_, err := vsctl(a...)
+	return nil, err
+}
