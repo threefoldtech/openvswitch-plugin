@@ -8,6 +8,7 @@ import (
 type VLanEnsureArguments struct {
 	Master string `json:"master"`
 	VLan   uint16 `json:"vlan"`
+	Name   string `json:"name"`
 }
 
 func (v *VLanEnsureArguments) Validate() error {
@@ -35,7 +36,11 @@ func VLanEnsure(args json.RawMessage) (interface{}, error) {
 		return nil, fmt.Errorf("master bridge does not exist")
 	}
 
-	name := fmt.Sprintf("vlbr%d", vlan.VLan)
+	name := vlan.Name
+	if name == "" {
+		name = fmt.Sprintf("vlbr%d", vlan.VLan)
+	}
+
 	if bridgeExists(name) {
 		//TODO: validate that the port is also added and of correct vlan tag.
 		return name, nil

@@ -40,35 +40,26 @@ func getGroupForVNID(vnid uint) net.IP {
 	return net.ParseIP(ip)
 }
 
-func VtepEnsure(args json.RawMessage) (interface{}, error) {
-	var vtep VTepEnsureArguments
-	if err := json.Unmarshal(args, &vtep); err != nil {
-		return nil, err
-	}
-
-	if err := vtep.Validate(); err != nil {
-		return nil, err
-	}
-
+func vtepEnsure(vtep *VTepEnsureArguments) (string, error) {
 	dev, err := netlink.LinkByName(vtep.Bridge.Bridge)
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	name := fmt.Sprintf("vtep-%d", vtep.VNID)
+	name := fmt.Sprintf("vtep%d", vtep.VNID)
 	link, err := netlink.LinkByName(name)
 
 	if err == nil {
 		if link.Type() != "vxlan" {
-			return nil, fmt.Errorf("invalid device type got '%s'", link.Type())
+			return name, fmt.Errorf("invalid device type got '%s'", link.Type())
 		}
 
 		if link.(*netlink.Vxlan).VtepDevIndex != dev.Attrs().Index {
-			return nil, fmt.Errorf("recrating same VNID with different vxbridge")
+			return name, fmt.Errorf("recrating same VNID with different vxbridge")
 		}
 
-		return nil, nil
+		return name, nil
 	}
 
 	vxlan := &netlink.Vxlan{
@@ -84,10 +75,23 @@ func VtepEnsure(args json.RawMessage) (interface{}, error) {
 	}
 
 	if err := netlink.LinkAdd(vxlan); err != nil {
+		return name, err
+	}
+
+	return name, netlink.LinkSetUp(vxlan)
+}
+
+func VtepEnsure(args json.RawMessage) (interface{}, error) {
+	var vtep VTepEnsureArguments
+	if err := json.Unmarshal(args, &vtep); err != nil {
 		return nil, err
 	}
 
-	return nil, netlink.LinkSetUp(vxlan)
+	if err := vtep.Validate(); err != nil {
+		return nil, err
+	}
+
+	return vtepEnsure(&vtep)
 }
 
 type VTepDeleteArguments struct {
@@ -111,7 +115,7 @@ func VtepDelete(args json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	name := fmt.Sprintf("vtep-%d", vtep.VNID)
+	name := fmt.Sprintf("vtep%d", vtep.VNID)
 	link, err := netlink.LinkByName(name)
 	if err != nil {
 		return nil, err
