@@ -28,6 +28,14 @@ func vsctl(args ...string) (string, error) {
 	return string(data), nil
 }
 
+func bridgeExists(name string) bool {
+	if _, err := vsctl("br-exists", name); err != nil {
+		return false
+	}
+
+	return true
+}
+
 type Bridge struct {
 	Bridge string `json:"bridge"`
 }
@@ -37,6 +45,11 @@ func (b *Bridge) Validate() error {
 		return fmt.Errorf("bridge name is not set")
 	}
 	return nil
+}
+
+func bridgeAdd(name string) error {
+	_, err := vsctl("add-br", name)
+	return err
 }
 
 func BridgeAdd(args json.RawMessage) (interface{}, error) {
@@ -49,7 +62,7 @@ func BridgeAdd(args json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	return vsctl("add-br", bridge.Bridge)
+	return nil, bridgeAdd(bridge.Bridge)
 }
 
 func BridgeDelete(args json.RawMessage) (interface{}, error) {
@@ -82,6 +95,30 @@ func (p *PortAddArguments) Validate() error {
 	return nil
 }
 
+func portAdd(port *PortAddArguments) error {
+	var err error
+	if port.VLan == 0 {
+		_, err = vsctl("add-port", port.Bridge.Bridge, port.Port)
+	} else {
+		_, err = vsctl("add-port", port.Bridge.Bridge, port.Port, fmt.Sprintf("tag=%d", port.VLan))
+	}
+
+	if err != nil {
+		return err
+	}
+
+	//setting options
+	if len(port.Options) != 0 {
+		return set(&SetArguments{
+			Table:  "Interface",
+			Record: port.Port,
+			Values: port.Options,
+		})
+	}
+
+	return nil
+}
+
 func PortAdd(args json.RawMessage) (interface{}, error) {
 	var port PortAddArguments
 	if err := json.Unmarshal(args, &port); err != nil {
@@ -92,27 +129,7 @@ func PortAdd(args json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	var err error
-	if port.VLan == 0 {
-		_, err = vsctl("add-port", port.Bridge.Bridge, port.Port)
-	} else {
-		_, err = vsctl("add-port", port.Bridge.Bridge, port.Port, fmt.Sprintf("tag=%d", port.VLan))
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	//setting options
-	if len(port.Options) != 0 {
-		return nil, set(&SetArguments{
-			Table:  "Interface",
-			Record: port.Port,
-			Values: port.Options,
-		})
-	}
-
-	return nil, nil
+	return nil, portAdd(&port)
 }
 
 type PortDelArguments struct {

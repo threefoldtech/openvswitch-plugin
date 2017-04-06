@@ -14,6 +14,7 @@ var (
 		"bond-add":    ovs.BondAdd,
 		"vtep-ensure": ovs.VtepEnsure,
 		"vtep-del":    ovs.VtepDelete,
+		"vlan-ensure": ovs.VLanEnsure,
 		"set":         ovs.Set,
 	}
 )
