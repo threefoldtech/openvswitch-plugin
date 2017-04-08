@@ -138,9 +138,6 @@ type PortDelArguments struct {
 }
 
 func (p *PortDelArguments) Validate() error {
-	if err := p.Bridge.Validate(); err != nil {
-		return err
-	}
 	if p.Port == "" {
 		return fmt.Errorf("missing port name")
 	}
@@ -156,7 +153,12 @@ func PortDel(args json.RawMessage) (interface{}, error) {
 	if err := port.Validate(); err != nil {
 		return nil, err
 	}
-	_, err := vsctl("del-port", port.Bridge.Bridge, port.Port)
+	var err error
+	if port.Bridge.Bridge == "" {
+		_, err = vsctl("del-port", port.Port)
+	} else {
+		_, err = vsctl("del-port", port.Bridge.Bridge, port.Port)
+	}
 
 	return nil, err
 }
