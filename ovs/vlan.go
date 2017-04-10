@@ -15,7 +15,7 @@ func (v *VLanEnsureArguments) Validate() error {
 	if v.Master == "" {
 		return fmt.Errorf("master bridge not specified")
 	}
-	if v.VLan == 0 || v.VLan >= 4095 {
+	if v.VLan < 0 || v.VLan >= 4095 { //0 for untagged
 		return fmt.Errorf("invalid vlan tag")
 	}
 	return nil
