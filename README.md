@@ -15,8 +15,7 @@ It also will have the required `.startup.toml` and `.plugin.toml`
 
 Once the `image` is created you cat upload it to `hub.gig.tech`
 
-### Supported commands
-> Work in progress
+## Supported low level commands
 
 #### ovs.bridge-add
 Add a new VSwitch
@@ -47,4 +46,62 @@ Add a new port to a switch
 	}
 }
 ```
+
+### ovs.port-del
+Add a port to a bridge
+```javascript
+{
+	"bridge": "name", //bridge name [optional]
+	"port": "port name", //port name
+}
+```
+
+### ovs.bond-add
+Add a bond to a bridge
+```javascript
+{
+	"bridge": "name", //bridge name
+	"port": "bond-name",
+	"links": ["eth0", "ethc1", "..."], //link names to bond
+	"mode": "mode", //bond modes (active-backup, balance-slb, balance-tcp)
+	"lacp": bool,
+}
+```
+
+### ovs.set
+Set attributes in a table
+```javascript
+{
+	"table": "table-name", //table name (Interface, etc...)
+	"record": "record-key", //record key (port name, etc...)
+	"options": {
+		"key", "value", // (ex: "type": "patch")
+	}
+}
+```
+
+## Supported high level commands
+Those command abstract some networking operations
+
+### ovs.vlan_ensure
+Create a tagged bridge with given vlan tag
+```javascript
+{
+	"master": "master-bridge-name", //ex: backplane
+	"vlan": tag, //vlan tag (0==untagged, or 1 to 4094)
+	"name": "create-bridge-name" //[optional], if not given bridge name will be "vlbr[tag]"
+}
+```
+returns the created bridge name
+
+
+### ovs.vxlan_ensure
+Create a vxlan bridge with given vxlan id
+```javascript
+{
+	"master": "master-bridge-name", //ex: vxbackend
+	"vxlan": id, //vxlan id
+}
+```
+returns the created bridge name
 
