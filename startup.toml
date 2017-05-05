@@ -1,13 +1,10 @@
 [startup."ovs.init"]
-name = "bash"
+name = "core.system"
 running_delay = -1
 
 [startup."ovs.init".args]
-script = """
-mkdir -p /run/openvswitch/
-mkdir -p /var/run/openvswitch/
-/usr/bin/ovsdb-tool create /etc/openvswitch/conf.db
-"""
+name = "/usr/bin/ovsdb-tool"
+args = ["create", "/etc/openvswitch/conf.db"]
 
 [startup.ovsdb]
 name = "core.system"
