@@ -3,6 +3,8 @@ BINARY = ovs-plugin
 
 all: ovs $(BINARY)
 	sudo mkdir -p image/var/lib/corex/plugins
+	sudo mkdir -p image/run/openvswitch
+	sudo mkdir -p image/var/run/openvswitch
 	sudo cp $(BINARY) image/var/lib/corex/plugins
 	sudo cp startup.toml image/.startup.toml
 	sudo cp plugin.toml image/.plugin.toml
