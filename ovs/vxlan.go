@@ -8,6 +8,7 @@ import (
 type VXLanEnsureArguments struct {
 	Master string `json:"master"`
 	VXLan  uint   `json:"vxlan"`
+	Name   string `json:"name"`
 }
 
 func (v *VXLanEnsureArguments) Validate() error {
@@ -43,10 +44,17 @@ func VXLanEnsure(args json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	name := fmt.Sprintf("vxlbr%d", vxlan.VXLan)
-	if bridgeExists(name) {
-		//TODO: validate that the port is also added and of correct vlan tag.
-		return name, nil
+	name := vxlan.Name
+	if name == "" {
+		name = fmt.Sprintf("vxlbr%d", vxlan.VXLan)
+	}
+
+	if br, ok := portToBridge(vtep); ok {
+		if br != name {
+			return nil, fmt.Errorf("reassigning vxlan tag to another bridge not allowed")
+		} else {
+			return name, nil
+		}
 	}
 
 	if err := bridgeAdd(name); err != nil {
