@@ -3,6 +3,7 @@ package ovs
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type VLanEnsureArguments struct {
@@ -19,6 +20,33 @@ func (v *VLanEnsureArguments) Validate() error {
 		return fmt.Errorf("invalid vlan tag")
 	}
 	return nil
+}
+
+func portsList(br string) ([]string, error) {
+	output, err := vsctl("list-ports", br)
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Fields(output), nil
+}
+
+func portToBridge(port string) (string, bool) {
+	out, err := vsctl("port-to-br", port)
+	if err != nil {
+		return "", false
+	}
+
+	return strings.TrimSpace(out), true
+}
+
+func in(l []string, a string) bool {
+	for _, i := range l {
+		if i == a {
+			return true
+		}
+	}
+	return false
 }
 
 func VLanEnsure(args json.RawMessage) (interface{}, error) {
@@ -41,9 +69,23 @@ func VLanEnsure(args json.RawMessage) (interface{}, error) {
 		name = fmt.Sprintf("vlbr%d", vlan.VLan)
 	}
 
-	if bridgeExists(name) {
-		//TODO: validate that the port is also added and of correct vlan tag.
-		return name, nil
+	portName := fmt.Sprintf("vlbr%dp", vlan.VLan)
+	portPeerName := fmt.Sprintf("vlbr%din", vlan.VLan)
+
+	if br, ok := portToBridge(portName); ok {
+		if br != vlan.Master {
+			return nil, fmt.Errorf("reassigning vlang tag to another master bridge is not allowed")
+		}
+	}
+
+	if br, ok := portToBridge(portPeerName); ok {
+		//peer already exists.
+		if br != name {
+			return nil, fmt.Errorf("reassigning vlan tag to another bridge not allowed")
+		} else {
+			//we already validated this setup.
+			return name, nil
+		}
 	}
 
 	if err := bridgeAdd(name); err != nil {
@@ -55,11 +97,11 @@ func VLanEnsure(args json.RawMessage) (interface{}, error) {
 		Bridge: Bridge{
 			Bridge: vlan.Master,
 		},
-		Port: fmt.Sprintf("vlbr%dp", vlan.VLan),
+		Port: portName,
 		VLan: vlan.VLan,
 		Options: map[string]string{
 			"type":         "patch",
-			"options:peer": fmt.Sprintf("vlbr%din", vlan.VLan),
+			"options:peer": portPeerName,
 		},
 	}); err != nil {
 		return nil, err
@@ -70,10 +112,10 @@ func VLanEnsure(args json.RawMessage) (interface{}, error) {
 		Bridge: Bridge{
 			Bridge: name,
 		},
-		Port: fmt.Sprintf("vlbr%din", vlan.VLan),
+		Port: portPeerName,
 		Options: map[string]string{
 			"type":         "patch",
-			"options:peer": fmt.Sprintf("vlbr%dp", vlan.VLan),
+			"options:peer": portName,
 		},
 	}); err != nil {
 		return nil, err

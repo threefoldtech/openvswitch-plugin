@@ -56,7 +56,7 @@ func vtepEnsure(vtep *VTepEnsureArguments) (string, error) {
 		}
 
 		if link.(*netlink.Vxlan).VtepDevIndex != dev.Attrs().Index {
-			return name, fmt.Errorf("recrating same VNID with different vxbridge")
+			return name, fmt.Errorf("reassigning vxlan to another master bridge is not allowed")
 		}
 
 		return name, nil
