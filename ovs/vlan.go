@@ -65,9 +65,6 @@ func VLanEnsure(args json.RawMessage) (interface{}, error) {
 	}
 
 	name := vlan.Name
-	if name == "" {
-		name = fmt.Sprintf("vlbr%d", vlan.VLan)
-	}
 
 	portName := fmt.Sprintf("vlbr%dp", vlan.VLan)
 	portPeerName := fmt.Sprintf("vlbr%din", vlan.VLan)
@@ -80,12 +77,18 @@ func VLanEnsure(args json.RawMessage) (interface{}, error) {
 
 	if br, ok := portToBridge(portPeerName); ok {
 		//peer already exists.
-		if br != name {
+		if name == "" {
+			return br, nil
+		} else if br != name {
 			return nil, fmt.Errorf("reassigning vlan tag to another bridge not allowed")
 		} else {
 			//we already validated this setup.
 			return name, nil
 		}
+	}
+
+	if name == "" {
+		name = fmt.Sprintf("vlbr%d", vlan.VLan)
 	}
 
 	if err := bridgeAdd(name); err != nil {

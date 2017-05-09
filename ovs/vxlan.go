@@ -45,16 +45,19 @@ func VXLanEnsure(args json.RawMessage) (interface{}, error) {
 	}
 
 	name := vxlan.Name
-	if name == "" {
-		name = fmt.Sprintf("vxlbr%d", vxlan.VXLan)
-	}
 
 	if br, ok := portToBridge(vtep); ok {
-		if br != name {
+		if name == "" {
+			return br, nil
+		} else if br != name {
 			return nil, fmt.Errorf("reassigning vxlan tag to another bridge not allowed")
 		} else {
 			return name, nil
 		}
+	}
+
+	if name == "" {
+		name = fmt.Sprintf("vxlbr%d", vxlan.VXLan)
 	}
 
 	if err := bridgeAdd(name); err != nil {
