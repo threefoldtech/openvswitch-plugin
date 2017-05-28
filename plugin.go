@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/g8os/core0/base/plugin"
-	"github.com/g8os/ovs-plugin/ovs"
+	"github.com/Zero-OS/0-Core/base/plugin"
+	"github.com/Zero-OS/ovs-plugin/ovs"
 )
 
 var (
