@@ -5,6 +5,11 @@ Ovs container is a container with ovs capabilities. Once a container is created
 from this image (with host_network=True), ovs capabilities will be plugged
 into the container.
 
+For more details see the [Introduction to Zero-OS](/docs/README.md) in the [`/docs`](/docs) documentation directory, which includes a comprehensive [table of contents](/docs/SUMMARY.md).
+
+For more details see the [For more details see the [Introduction to the Open vSwitch Plugin](/docs/README.md) in the [`/docs`](/docs) documentation directory, which includes a [table of contents](/docs/SUMMARY.md).
+
+
 ### Building
 to build simply run
 ```bash
@@ -104,4 +109,3 @@ Create a vxlan bridge with given vxlan id
 }
 ```
 returns the created bridge name
-
