@@ -27,6 +27,7 @@ Add a new VSwitch
 ```javascript
 {
 	"bridge": "name", //bridge name
+	"options": {"stp_enable": "true"} //optional options
 }
 ```
 

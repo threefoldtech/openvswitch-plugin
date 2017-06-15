@@ -3,16 +3,11 @@ package ovs
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/op/go-logging"
 	"os/exec"
 )
 
 const (
 	Binary = "ovs-vsctl"
-)
-
-var (
-	log = logging.MustGetLogger("ovs")
 )
 
 func vsctl(args ...string) (string, error) {
@@ -37,7 +32,8 @@ func bridgeExists(name string) bool {
 }
 
 type Bridge struct {
-	Bridge string `json:"bridge"`
+	Bridge  string            `json:"bridge"`
+	Options map[string]string `json:"options"`
 }
 
 func (b *Bridge) Validate() error {
@@ -47,8 +43,12 @@ func (b *Bridge) Validate() error {
 	return nil
 }
 
-func bridgeAdd(name string) error {
-	_, err := vsctl("add-br", name)
+func bridgeAdd(name string, options map[string]string) error {
+	commands := []string{"add-br", name}
+	for key, value := range options {
+		commands = append(commands, "--", "set", "Bridge", name, fmt.Sprintf("%s=%s", key, value))
+	}
+	_, err := vsctl(commands...)
 	return err
 }
 
@@ -62,7 +62,7 @@ func BridgeAdd(args json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	return nil, bridgeAdd(bridge.Bridge)
+	return nil, bridgeAdd(bridge.Bridge, bridge.Options)
 }
 
 func BridgeDelete(args json.RawMessage) (interface{}, error) {

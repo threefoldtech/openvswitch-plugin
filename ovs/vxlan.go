@@ -36,7 +36,7 @@ func VXLanEnsure(args json.RawMessage) (interface{}, error) {
 	}
 
 	vtep, err := vtepEnsure(&VTepEnsureArguments{
-		Bridge: Bridge{vxlan.Master},
+		Bridge: Bridge{vxlan.Master, nil},
 		VNID:   vxlan.VXLan,
 	})
 
@@ -60,13 +60,13 @@ func VXLanEnsure(args json.RawMessage) (interface{}, error) {
 		name = fmt.Sprintf("vxlbr%d", vxlan.VXLan)
 	}
 
-	if err := bridgeAdd(name); err != nil {
+	if err := bridgeAdd(name, nil); err != nil {
 		return nil, err
 	}
 
 	//add port in vxlan bridge
 	if err := portAdd(&PortAddArguments{
-		Bridge: Bridge{name},
+		Bridge: Bridge{name, nil},
 		Port:   vtep,
 	}); err != nil {
 		return nil, err
