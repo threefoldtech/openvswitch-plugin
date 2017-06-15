@@ -91,7 +91,7 @@ func VLanEnsure(args json.RawMessage) (interface{}, error) {
 		name = fmt.Sprintf("vlbr%d", vlan.VLan)
 	}
 
-	if err := bridgeAdd(name); err != nil {
+	if err := bridgeAdd(name, nil); err != nil {
 		return nil, err
 	}
 
