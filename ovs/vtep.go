@@ -3,8 +3,9 @@ package ovs
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vishvananda/netlink"
 	"net"
+
+	"github.com/vishvananda/netlink"
 )
 
 const (
@@ -66,6 +67,7 @@ func vtepEnsure(vtep *VTepEnsureArguments) (string, error) {
 		LinkAttrs: netlink.LinkAttrs{
 			Name:   name,
 			Flags:  net.FlagBroadcast | net.FlagMulticast,
+			MTU:    1500,
 			TxQLen: -1,
 		},
 		VxlanId:      int(vtep.VNID),
