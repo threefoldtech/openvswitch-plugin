@@ -12,7 +12,7 @@ after = ["ovs.init"]
 
 [startup.ovsdb.args]
 name = "/usr/sbin/ovsdb-server"
-args = ["--remote=punix:/var/run/openvswitch/db.sock", "--pidfile=/run/openvswitch/ovsdb-server.pid"]
+args = ["--remote=punix:/var/run/openvswitch/db.sock", "--pidfile=/var/run/openvswitch/ovsdb-server.pid"]
 
 [startup.ovs]
 name = "core.system"
@@ -20,4 +20,4 @@ after = ["ovsdb"]
 
 [startup.ovs.args]
 name = "/usr/sbin/ovs-vswitchd"
-args = ["--pidfile=/run/openvswitch/ovs-vswitchd.pid"]
+args = ["--pidfile=/var/run/openvswitch/ovs-vswitchd.pid"]
