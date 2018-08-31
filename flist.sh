@@ -43,9 +43,9 @@ fi
 mkdir -p /gopath
 export GOPATH=/gopath
 
-OVSPLUGIN=$GOPATH/src/github.com/zero-os/openvswitch-plugin
+OVSPLUGIN=$GOPATH/src/github.com/threefoldtech/openvswitch-plugin
 
-go get -u -v -d github.com/zero-os/openvswitch-plugin
+go get -u -v -d github.com/threefoldtech/openvswitch-plugin
 
 
 TARGET=/tmp/target-ovs
@@ -72,8 +72,6 @@ copypkg openvswitch-common "$TARGET"
 pushd "$TARGET/usr/sbin"
 ln -s /usr/lib/openvswitch-switch/ovs-vswitchd
 popd
-#bash /opt/lddcopy/lddcopy.sh "/bin/mkdir" "$TARGET"
-#cp /bin/mkdir "$TARGET/bin/mkdir"
 
 cd "$TARGET"
 tar -czf /tmp/archives/ovs.tar.gz .
