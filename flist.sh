@@ -60,10 +60,6 @@ mkdir -p "$TARGET/run/openvswitch"
 mkdir -p "$TARGET/var/run/openvswitch"
 mkdir -p "$TARGET/tmp"
 
-pushd "$TARGET"
-ln -s lib lib64
-popd
-
 pushd $OVSPLUGIN
 go build -o "$TARGET/var/lib/corex/plugins/ovs-plugin"
 cp startup.toml "$TARGET/.startup.toml"
