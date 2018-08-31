@@ -1,16 +1,14 @@
 #!/bin/bash
-
 set -ex
+
+apt-get update
+apt-get install -y openvswitch-switch wget locales
 
 # setting up locales
 if ! grep -q ^en_US /etc/locale.gen; then
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
     locale-gen
 fi
-
-apt-get update
-apt-get install -y openvswitch-switch wget
-
 
 wget https://dl.google.com/go/go1.11.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.11.linux-amd64.tar.gz
