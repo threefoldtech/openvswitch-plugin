@@ -13,25 +13,26 @@ fi
 wget https://dl.google.com/go/go1.11.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.11.linux-amd64.tar.gz
 
-mkdir -p $HOME/go/bin
-mkdir -p $HOME/go/pkg
-mkdir -p $HOME/go/src
-mkdir -p $HOME/src/github.com/threefoldtech
+export GOPATH=$HOME/go
+mkdir -p $GOPATH/bin
+mkdir -p $GOPATH/pkg
+mkdir -p $GOPATH/src
+mkdir -p $GOPATH/src/github.com/threefoldtech
 mkdir -p /var/lib/corex/plugins
 mkdir -p /run/openvswitch
 mkdir -p /var/run/openvswitch
 
-cp -r /openvswitch-plugin $HOME/src/github.com/threefoldtech
+cp -r /openvswitch-plugin $GOPATH/src/github.com/threefoldtech
 
 export PATH=$PATH:/usr/local/go/bin
-export GOPATH=$HOME/go
 
 BINARY=ovs-plugin
 
-cd $HOME/src/github.com/threefoldtech
+cd $GOPATH/src/github.com/threefoldtech/openvswitch-plugin
 go build -o $BINARY
-cp $BINARY image/var/lib/corex/plugins
-cp startup.toml image/.startup.toml
-cp plugin.toml image/.plugin.toml
+cp $BINARY /var/lib/corex/plugins
+cp startup.toml /.startup.toml
+cp plugin.toml /.plugin.toml
 
+mkdir -p /tmp/archives
 tar -cpzf "/tmp/archives/ovs.tar.gz" --exclude tmp --exclude dev --exclude sys --exclude proc /
