@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/zero-os/0-core/base/plugin"
-	"github.com/zero-os/openvswitch-plugin/ovs"
+	"github.com/threefoldtech/0-core/base/plugin"
+	"github.com/threefoldtech/openvswitch-plugin/ovs"
 )
 
 var (
