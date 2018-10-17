@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 const (
@@ -215,10 +216,11 @@ const (
 
 type BondAddArguments struct {
 	Bridge
-	Port  string   `json:"port"`
-	Links []string `json:"links"`
-	Mode  BondMode `json:"mode"`
-	LACP  bool     `json:"lacp"`
+	Port    string            `json:"port"`
+	Links   []string          `json:"links"`
+	Mode    BondMode          `json:"mode"`
+	LACP    bool              `json:"lacp"`
+	Options map[string]string `json:"options"`
 }
 
 func (b *BondAddArguments) Validate() error {
@@ -246,6 +248,17 @@ func BondAdd(args json.RawMessage) (interface{}, error) {
 	if err := bond.Validate(); err != nil {
 		return nil, err
 	}
+
+	cmdArgs, err := bondAddCmd(bond)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = vsctl(cmdArgs...)
+	return nil, err
+}
+
+func bondAddCmd(bond BondAddArguments) ([]string, error) {
 	mode := bond.Mode
 	if mode == BondMode("") {
 		mode = BondModeBalanceSLB
@@ -257,6 +270,15 @@ func BondAdd(args json.RawMessage) (interface{}, error) {
 	}
 	a = append(a, fmt.Sprintf("bond_mode=%v", mode))
 
-	_, err := vsctl(a...)
-	return nil, err
+	if len(bond.Options) > 0 {
+		a = append(a, "other_config:")
+	}
+	otherConfig := a[len(a)-1]
+	for name, value := range bond.Options {
+		otherConfig += fmt.Sprintf("%s=%s,", name, value)
+	}
+	a[len(a)-1] = otherConfig
+	a[len(a)-1] = strings.TrimSuffix(a[len(a)-1], ",")
+
+	return a, nil
 }
