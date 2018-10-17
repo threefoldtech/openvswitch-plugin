@@ -255,7 +255,12 @@ func BondAdd(args json.RawMessage) (interface{}, error) {
 	if bond.LACP {
 		a = append(a, "lacp=active")
 	}
+
 	a = append(a, fmt.Sprintf("bond_mode=%v", mode))
+
+	for k, v := range bond.Options {
+		a = append(a, fmt.Sprintf("%v=%v", k, v))
+	}
 
 	_, err := vsctl(a...)
 	return nil, err
